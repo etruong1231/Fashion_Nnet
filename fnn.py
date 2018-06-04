@@ -1,5 +1,6 @@
 import numpy as np
 import csv
+import random
 
 ## created a neural network for Fashion MNIST
 
@@ -31,7 +32,7 @@ class FashionNeuralNet():
 		reader = csv.reader(raw_data, delimiter=',', quoting=csv.QUOTE_NONE)
 		x = list(reader)
 		data = np.array(x)
-		np.random.seed(5)
+		np.random.seed(2)
 		#gets the inputs from the csv
 		# divide to normalize the inputs
 		self.inputs = np.array(data[1:,1:,]).astype(np.float)/1000
@@ -50,7 +51,7 @@ class FashionNeuralNet():
 
 		neurons = [784,16,14,10]
 		# -1 to add a bias for each layer
-		self.weights = [2*np.random.random((neurons[x], neurons[x+1]))- 1 for x in range(3)]
+		self.weights = [2 * np.random.random((neurons[x], neurons[x+1]))-1 for x in range(3)]
 		print("\n*****Created Neural Network*****")
 
 	# Activation function
@@ -88,13 +89,15 @@ class FashionNeuralNet():
 
 		hidden_delta1 = hidden_error1 * self.sigmoid_derivative(hidden_layer1)
 
+
+
 		# now we have to readjust the layers to make the weights better
 		self.weights[2] += hidden_layer2.T.dot(output_delta) * learning_rate
 		self.weights[1] += hidden_layer1.T.dot(hidden_delta2) * learning_rate
 		self.weights[0] += input_layer.T.dot(hidden_delta1) * learning_rate
 
 
-	def train(self, learning_rate = 1, epochs = 1000, early_stopping = False,minibatch_size = 1200):
+	def train(self, learning_rate = 1, epochs = 50, early_stopping = False,minibatch_size = 200):
 		'''trains the neural network and feedforward, backpropagation to improve the neural network'''
 		# train the neuron network for a amount of epochs
 		print("\n*****Starting to train the Neural Network*****\n")
@@ -104,6 +107,7 @@ class FashionNeuralNet():
 		# does a mini batch sdg 
 		for count in range(0, self.inputs.shape[0], minibatch_size):
 			for train_count in range(0,epochs):
+				random.shuffle(self.inputs)
 				inputs = self.inputs[count: count+minibatch_size]
 				outputs = self.outputs[count: count+minibatch_size]
 				# need to feed the neuron network forward
@@ -158,5 +162,6 @@ if __name__ == "__main__":
 
 	fnn = FashionNeuralNet('fashion-mnist_train.csv')
 	fnn.train()
+	fnn.testing_predict_error('fashion-mnis_text.csv')
 
 	
